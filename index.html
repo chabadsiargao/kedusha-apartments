@@ -1834,8 +1834,18 @@ async function init(){
   if(!firebaseConfig||!firebaseConfig.apiKey||!firebaseConfig.projectId){S.status="noconfig";render();return;}
   try{FBX=await connect(firebaseConfig);}catch(e){S.status="noconfig";render();return;}
   S.db=FBX.db;S.status="ok";
-  // While the site is open, show incoming notifications as a toast.
-  FBX.push.onForeground(p=>{const n=p&&p.notification;if(n)toast((n.title||"")+(n.body?" · "+n.body:""));});
+  // While the site is open the phone doesn't show the push by itself, so pop it up here.
+  FBX.push.onForeground(async p=>{
+    const n=p&&p.notification;if(!n)return;
+    try{
+      const reg=await navigator.serviceWorker.getRegistration("./");
+      if(reg&&Notification.permission==="granted"){
+        await reg.showNotification(n.title||"",{body:n.body||"",icon:"icon-192.png",badge:"icon-192.png",dir:S.lang==="he"?"rtl":"ltr",lang:S.lang,vibrate:[200,100,200],tag:"k"+Date.now()});
+        return;
+      }
+    }catch(_){}
+    toast((n.title||"")+(n.body?" · "+n.body:""));
+  });
   S.db.doc("meta/setup").onSnapshot(d=>{S.setupOpen=!d.exists;if(!S.setupOpen)S.showSetup=false;render();},()=>{S.setupOpen=false;render();});
   FBX.onAuth(u=>{
     if(profUnsub){profUnsub();profUnsub=null;}

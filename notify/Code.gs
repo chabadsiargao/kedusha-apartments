@@ -97,7 +97,10 @@ function push_(devices, msg) {
   devices.forEach(t => {
     const en = t.lang === "en", m = en ? msg.en : msg.he;
     const r = api_("post", FCM, { message: { token: t._id, webpush: {
-      notification: { title: m.title, body: m.body, icon: ICON, badge: ICON, lang: en ? "en" : "he", dir: en ? "ltr" : "rtl" },
+      // High urgency so phones wake up and pop the notification on screen.
+      headers: { Urgency: "high", TTL: "86400" },
+      notification: { title: m.title, body: m.body, icon: ICON, badge: ICON, lang: en ? "en" : "he", dir: en ? "ltr" : "rtl",
+        vibrate: [200, 100, 200], tag: "k" + Date.now() },
       fcm_options: { link: msg.link || SITE }
     } } });
     // A token the phone no longer uses: forget it.

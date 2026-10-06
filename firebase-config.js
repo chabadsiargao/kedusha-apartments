@@ -10,4 +10,4 @@ export const firebaseConfig = {
 };
 
 // Google Apps Script web app that emails the owner when someone registers. Empty = no email.
-export const notifyUrl = "";
+export const notifyUrl = "https://script.google.com/macros/s/AKfycbwFu4oXF8F_k255qgkH4ZfKs7qSUapEpwOK4E7Ny8GumSxK5eyw6G-gQ3ehaH4bDVOq/exec";

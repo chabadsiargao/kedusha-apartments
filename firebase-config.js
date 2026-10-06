@@ -8,3 +8,6 @@ export const firebaseConfig = {
   messagingSenderId: "573751280302",
   appId: "1:573751280302:web:11c2d7fd36554984ae633f"
 };
+
+// Google Apps Script web app that emails the owner when someone registers. Empty = no email.
+export const notifyUrl = "";

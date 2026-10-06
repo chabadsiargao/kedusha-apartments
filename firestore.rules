@@ -7,7 +7,8 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function profPath() { return /databases/$(database)/documents/users/$(request.auth.uid); }
     function prof() { return get(profPath()).data; }
-    function active() { return signedIn() && exists(profPath()) && prof().get('disabled', false) != true; }
+    function active() { return signedIn() && exists(profPath()) && prof().get('disabled', false) != true
+      && prof().role in ['manager', 'cleaning', 'maintenance']; }
     function hasRole(r) { return active() && prof().role == r; }
     function isMgr() { return hasRole('manager'); }
     function isCleaner() { return hasRole('cleaning'); }
@@ -30,7 +31,13 @@ service cloud.firestore {
       allow create: if isMgr()
         || (signedIn() && uid == request.auth.uid
             && !exists(setupPath()) && existsAfter(setupPath())
-            && request.resource.data.role == 'manager');
+            && request.resource.data.role == 'manager')
+        // Self-registration: anyone signed in may ask to join. A manager approves and sets the role.
+        || (signedIn() && uid == request.auth.uid && exists(setupPath())
+            && request.resource.data.role == 'pending'
+            && request.resource.data.keys().hasOnly(['name', 'username', 'role', 'at', 'note'])
+            && request.resource.data.name is string && request.resource.data.name.size() <= 60
+            && request.resource.data.get('note', '') is string && request.resource.data.get('note', '').size() <= 300);
       allow update: if isMgr();
       allow delete: if false;
     }

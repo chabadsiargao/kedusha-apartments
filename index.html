@@ -205,6 +205,7 @@ textarea{min-height:84px;resize:vertical}
 .lock-card p{margin:0}
 .lock-brand{display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--f-display);font-size:1.05rem}
 .lock-card form{text-align:start}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline;font:inherit}
 .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
 .person{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 8px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);min-width:0}
 .person b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -408,7 +409,7 @@ details.tbl summary{cursor:pointer;color:var(--accent);font-weight:600;font-size
 
 <script type="module">
 import {connect} from "./fb.js";
-import {firebaseConfig} from "./firebase-config.js";
+import {firebaseConfig, notifyUrl} from "./firebase-config.js";
 (function(){
 "use strict";
 
@@ -426,7 +427,7 @@ const S={
   issueFilter:"open",issueUnit:"",stayFilter:"active",sheet:null,
   entries:[],recurring:[],cfMonth:null,cfFilter:"all",
   boardView:LS.get("bview")==="cal"?"cal":"grid",calStart:null,
-  users:{},authUser:null,authReady:false,profile:null,profileLoaded:false,setupOpen:false,showSetup:false,settingUp:false,pendingImport:null
+  users:{},authUser:null,authReady:false,profile:null,profileLoaded:false,setupOpen:false,showSetup:false,showSignup:false,settingUp:false,pendingImport:null
 };
 const ROLES=["manager","cleaning","maintenance"];
 const PERMS={cleaning:["clean","report"],maintenance:["report","issueStatus"]};
@@ -555,7 +556,16 @@ he:{
   invite1:"בתיבה \"משתמשים וקודים\" לוחצים \"הוסף משתמש\" ונותנים שם, שם משתמש, תפקיד וקוד.",
   invite2:"שולחים לו את כתובת האתר, את שם המשתמש ואת הקוד. לא צריך חשבון claude.ai.",
   invite3:"בטלפון אפשר להוסיף את האתר למסך הבית (בתפריט הדפדפן: \"הוספה למסך הבית\"), והוא ייפתח כמו אפליקציה.",
-  onlyOne:"",addMoreUsers:"כרגע רק את/ה מוגדר/ת במערכת. הוסיפו את שאר המנהלים והצוות, כל אחד עם שם משתמש וקוד משלו."
+  onlyOne:"",addMoreUsers:"כרגע רק את/ה מוגדר/ת במערכת. הוסיפו את שאר המנהלים והצוות, כל אחד עם שם משתמש וקוד משלו.",
+  noAccount:"אין לכם חשבון?",signupLink:"הרשמה",signupTitle:"בקשת הצטרפות",
+  signupSub:"ממלאים את הפרטים. מנהל יאשר את החשבון ויקבע את התפקיד, ואז אפשר להיכנס.",
+  f_signupNote:"מי אתם? (לא חובה)",f_signupNoteHint:"למשל: עובד/ת ניקיון, איש תחזוקה, שותף.",signupBtn:"שלח בקשה",
+  pendingTitle:"הבקשה נשלחה",pendingSub:"החשבון ממתין לאישור מנהל. אחרי האישור נכנסים עם שם המשתמש והקוד שבחרתם.",
+  reqTitle:n=>`בקשות הצטרפות (${n})`,reqHelp:"בוחרים תפקיד ולוחצים \"אשר\". מי שנדחה לא יוכל להיכנס.",
+  approve:"אשר",reject:"דחה",approvedMsg:n=>`${n} אושר/ה`,review:"לבקשות",
+  reqNotice:n=>n===1?"יש בקשת הצטרפות אחת שממתינה לאישור.":`יש ${n} בקשות הצטרפות שממתינות לאישור.`,
+  invite1:"אפשר להוסיף אדם בעצמך ב\"הוסף משתמש\", או לשלוח לו את כתובת האתר כדי שיירשם ב\"הרשמה\".",
+  invite2:"כשמישהו נרשם, מגיע אליך מייל והבקשה מופיעה כאן למעלה. בוחרים תפקיד ומאשרים."
 },
 en:{
   appTitle:"Kedusha Apartments",sub:"Shared board for the apartments",langBtn:"עברית",
@@ -674,7 +684,16 @@ en:{
   invite1:"Under \"Users & codes\", tap \"Add user\" and enter a name, username, role and code.",
   invite2:"Send them the site address, their username and code. No claude.ai account needed.",
   invite3:"On a phone, add the site to the home screen (browser menu: \"Add to Home Screen\") and it opens like an app.",
-  onlyOne:"",addMoreUsers:"You're the only user so far. Add the other managers and staff, each with their own username and code."
+  onlyOne:"",addMoreUsers:"You're the only user so far. Add the other managers and staff, each with their own username and code.",
+  noAccount:"No account?",signupLink:"Register",signupTitle:"Request access",
+  signupSub:"Fill in your details. A manager approves the account and sets your role, then you can sign in.",
+  f_signupNote:"Who are you? (optional)",f_signupNoteHint:"For example: cleaner, maintenance, partner.",signupBtn:"Send request",
+  pendingTitle:"Request sent",pendingSub:"Your account is waiting for a manager's approval. Once approved, sign in with the username and code you chose.",
+  reqTitle:n=>`Access requests (${n})`,reqHelp:"Pick a role and tap \"Approve\". Rejected people can't sign in.",
+  approve:"Approve",reject:"Reject",approvedMsg:n=>`${n} approved`,review:"Review",
+  reqNotice:n=>n===1?"One access request is waiting for approval.":`${n} access requests are waiting for approval.`,
+  invite1:"Add a person yourself with \"Add user\", or send them the site address so they register under \"Register\".",
+  invite2:"When someone registers you get an email and the request shows up at the top here. Pick a role and approve."
 }};
 function t(k,...a){const v=(T[S.lang][k]!==undefined?T[S.lang][k]:T.he[k]);if(v===undefined)return k;return typeof v==="function"?v(...a):v;}
 
@@ -739,7 +758,9 @@ const normRole=r=>r==="manager"?"manager":r==="maintenance"?"maintenance":"clean
 const actorId=()=>S.authUser?S.authUser.uid:null;
 function role(){return S.profile&&!S.profile.disabled?normRole(S.profile.role):"cleaning";}
 const initial=n=>([...String(n||"?").trim()][0]||"?").toUpperCase();
-const activeUsers=()=>Object.entries(S.users).filter(([,u])=>!u.disabled).map(([id,u])=>Object.assign({id},u));
+const activeUsers=()=>Object.entries(S.users).filter(([,u])=>!u.disabled&&ROLES.includes(u.role)).map(([id,u])=>Object.assign({id},u));
+const pendingUsers=()=>Object.entries(S.users).filter(([,u])=>!u.disabled&&u.role==="pending").map(([id,u])=>Object.assign({id},u)).sort((a,b)=>(a.at||0)-(b.at||0));
+function notifyManagers(p){if(!notifyUrl)return;try{fetch(notifyUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(p)}).catch(()=>{});}catch(_){}}
 const mgrCount=()=>activeUsers().filter(u=>u.role==="manager").length;
 // A username becomes a sign-in address inside the project's own domain. Nothing is ever emailed.
 function normUser(u){return String(u||"").trim().toLowerCase().replace(/\s+/g,"");}
@@ -792,9 +813,10 @@ function draw(){
   if(S.status==="ok"){
     let gate=null;const loading=`<div class="wrap lock"><div class="lock-card"><p class="muted">${t("loading")}</p></div></div>`;
     if(!S.authReady)gate=loading;
-    else if(!S.authUser)gate=(S.setupOpen&&S.showSetup)?setupScreen():loginScreen();
+    else if(!S.authUser)gate=(S.setupOpen&&S.showSetup)?setupScreen():(!S.setupOpen&&S.showSignup)?signupScreen():loginScreen();
     else if(!S.profileLoaded||S.settingUp)gate=loading;
-    else if(!S.profile||S.profile.disabled)gate=inactiveScreen();
+    else if(S.profile&&!S.profile.disabled&&S.profile.role==="pending")gate=pendingScreen();
+    else if(!S.profile||S.profile.disabled||!ROLES.includes(S.profile.role))gate=inactiveScreen();
     if(gate){if(S.sheet)closeSheet();const keep=gateKeep();app.innerHTML=gate;gateRestore(keep);return;}
   }
   const allowed=TABS[role()];
@@ -811,6 +833,7 @@ function draw(){
   else if(S.status==="nodb")notice=`<div class="notice">${t("nodb")}</div>`;
   else if(S.status==="revoked")notice=`<div class="notice">${t("revoked")}</div>`;
   else if(!S.canWrite)notice=`<div class="notice">${t("readonly")}</div>`;
+  else if(isMgr()&&pendingUsers().length)notice=`<div class="notice" style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>${t("reqNotice",pendingUsers().length)}</span><button type="button" class="btn small" data-act="goRequests">${t("review")}</button></div>`;
   else if(isMgr()&&activeUsers().length<2)notice=`<div class="notice" style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>${t("addMoreUsers")}</span><button type="button" class="btn small" data-act="newPerson">${svg("plus")}${t("addUser")}</button></div>`;
   const view={board:viewBoard,clean:viewClean,issues:viewIssues,money:viewMoney,cash:viewCash,more:viewMore}[tabNow]||viewBoard;
   app.innerHTML=`
@@ -822,7 +845,7 @@ function draw(){
         <button type="button" class="btn ghost small" data-act="lang" aria-label="${t("langBtn")}">${svg("globe")}<span class="hide-sm">${t("langBtn")}</span><span class="show-sm">${t("langShort")}</span></button>
       </div>
     </div>
-    <nav class="tabs" role="tablist">${tabs.map(([k,i])=>`<button type="button" role="tab" class="tab" aria-selected="${tabNow===k}" data-act="tab" data-v="${k}">${svg(i)}<span class="tl-long">${t("tab_"+k)}</span><span class="tl-short">${t("tabS_"+k)}</span>${k==="issues"&&nIss?`<span class="badge num">${nIss}</span>`:""}</button>`).join("")}</nav>
+    <nav class="tabs" role="tablist">${tabs.map(([k,i])=>`<button type="button" role="tab" class="tab" aria-selected="${tabNow===k}" data-act="tab" data-v="${k}">${svg(i)}<span class="tl-long">${t("tab_"+k)}</span><span class="tl-short">${t("tabS_"+k)}</span>${k==="issues"&&nIss?`<span class="badge num">${nIss}</span>`:""}${k==="more"&&isMgr()&&pendingUsers().length?`<span class="badge num">${pendingUsers().length}</span>`:""}</button>`).join("")}</nav>
   </div></header>
   <main class="wrap">${notice}${view()}</main>`;
   if(calScroll!=null){const n=document.querySelector(".cal-scroll");if(n)n.scrollLeft=calScroll;}
@@ -1061,6 +1084,7 @@ function loginScreen(){
     <button class="btn" type="submit">${svg("check")}${t("enter")}</button>
     <p class="help" style="margin:0">${t("forgot")}</p>
   </form>
+  ${!S.setupOpen?`<p style="margin:0">${t("noAccount")} <button type="button" class="linkbtn" data-act="showSignup">${t("signupLink")}</button></p>`:""}
   ${S.setupOpen?`<div class="notice" style="margin:0;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>${t("setupInvite")}</span><button type="button" class="btn small" data-act="showSetup">${t("firstTime")}</button></div>`:""}`);
 }
 function setupScreen(){
@@ -1072,6 +1096,27 @@ function setupScreen(){
     <div class="err" id="form-err"></div>
     <div class="form-actions"><button class="btn" type="submit">${svg("check")}${t("setupBtn")}</button><button class="btn ghost" type="button" data-act="hideSetup">${t("back")}</button></div>
   </form>`);
+}
+function signupScreen(){
+  return lockFrame(`<h2>${t("signupTitle")}</h2><p class="muted">${t("signupSub")}</p>
+  <form data-form="signup" novalidate>
+    <div class="field"><label for="sg-name">${t("f_name")}</label><input type="text" id="sg-name" name="name" maxlength="40" autofocus></div>
+    ${userField("sg-user","")}
+    ${codeFields("sg")}
+    <div class="field"><label for="sg-note">${t("f_signupNote")}</label><input type="text" id="sg-note" name="note" maxlength="200"><span class="hint">${t("f_signupNoteHint")}</span></div>
+    <div class="err" id="form-err"></div>
+    <div class="form-actions"><button class="btn" type="submit">${svg("check")}${t("signupBtn")}</button><button class="btn ghost" type="button" data-act="hideSignup">${t("back")}</button></div>
+  </form>`);
+}
+function pendingScreen(){return lockFrame(`<h2>${t("pendingTitle")}</h2><p class="muted">${t("pendingSub")}</p><button type="button" class="btn ghost" data-act="logout">${svg("lock")}${t("signOut")}</button>`);}
+function requestsPanel(){
+  const list=pendingUsers();if(!list.length)return "";
+  return `<div class="panel" id="requests"><h3>${t("reqTitle",list.length)}</h3><p class="help" style="margin:4px 0 6px">${t("reqHelp")}</p>
+  ${list.map(p=>`<div class="urow"><span class="av sm cleaning" aria-hidden="true">${esc(initial(p.name))}</span><span class="nm">${esc(p.name)}<br><small class="muted"><bdi>${esc(p.username||"")}</bdi> · ${fmtTs(p.at)}</small>${p.note?`<br><small>${esc(p.note)}</small>`:""}</span>
+    <select id="rq-${esc(p.id)}" aria-label="${t("f_role")}" style="width:auto"${dis()}>${ROLES.map(x=>`<option value="${x}"${x==="cleaning"?" selected":""}>${t("role_"+x)}</option>`).join("")}</select>
+    <button type="button" class="btn small" data-act="approve" data-id="${esc(p.id)}"${dis()}>${svg("check")}${t("approve")}</button>
+    <button type="button" class="btn danger small" data-act="reject" data-id="${esc(p.id)}"${dis()}>${t("reject")}</button></div>`).join("")}
+  </div>`;
 }
 function inactiveScreen(){return lockFrame(`<h2>${t("inactiveTitle")}</h2><p class="muted">${t("inactiveSub")}</p><button type="button" class="btn" data-act="logout">${svg("lock")}${t("signOut")}</button>`);}
 const ROLE_ORDER={manager:0,cleaning:1,maintenance:2};
@@ -1140,6 +1185,7 @@ function viewMore(){
   return `<div class="section-head"><h2>${t("moreTitle")}</h2></div>
   <div class="two">
     <div class="list">
+      ${mgr?requestsPanel():""}
       ${mgr?`<div class="panel"><div class="block"><h3>${t("settingsTitle")}</h3>
         <form data-form="sysname" novalidate style="margin-bottom:14px">
           <div class="field"><label for="set-name">${t("sysName")}</label>
@@ -1473,6 +1519,14 @@ const ACT={
   async delStay(ds,el){if(!isMgr())return;if(!arm(el))return;const s=S.stays.find(x=>x.id===ds.id);if(!s)return;
     if(await safe(()=>S.db.doc("fin/data/stays/"+s.id).delete())){log("stay_del",s.u);await safe(()=>syncSchedule(s.u,s.id,null));}},
   showSetup(){S.showSetup=true;render();},
+  showSignup(){S.showSignup=true;render();},
+  hideSignup(){S.showSignup=false;render();},
+  goRequests(){S.tab="more";LS.set("tab","more");render();setTimeout(()=>{const r=document.getElementById("requests");if(r)r.scrollIntoView({block:"start"});},50);},
+  async approve(ds){if(!isMgr())return;const p=S.users[ds.id];if(!p||p.role!=="pending")return;
+    const sel=document.getElementById("rq-"+ds.id);const r=normRole(sel?sel.value:"cleaning");
+    if(await safe(()=>S.db.doc("users/"+ds.id).update({role:r,approvedAt:Date.now(),approvedBy:actorId()}))){log("user");toast(t("approvedMsg",p.name));}},
+  async reject(ds,el){if(!isMgr())return;const p=S.users[ds.id];if(!p||p.role!=="pending")return;if(!arm(el))return;
+    if(await safe(()=>S.db.doc("users/"+ds.id).update({disabled:true,rejected:true,disabledAt:Date.now()})))log("user");},
   hideSetup(){S.showSetup=false;render();},
   logout(){closeSheet();if(FBX)FBX.signOut();window.scrollTo(0,0);},
   myAccount(){openSheet({type:"me"});},
@@ -1573,6 +1627,25 @@ const FORMS={
       if(acct){try{await acct.remove();}catch(_){}}
       S.settingUp=false;render();
       const f=document.querySelector('form[data-form="setup"]');if(f)ferr(f,acct?t("errGen"):authMsg(e));return;
+    }
+    S.settingUp=false;render();
+  },
+  async signup(fd,form){
+    if(S.setupOpen)return;
+    const name=String(fd.get("name")||"").trim().slice(0,40);if(!name)return ferr(form,t("e_name"));
+    const u=fd.get("username");if(!validUser(u))return ferr(form,t("e_user"));
+    const pin=checkCode(fd,form);if(!pin)return;
+    const note=String(fd.get("note")||"").trim().slice(0,200);
+    S.settingUp=true;let acct=null;
+    try{
+      acct=await FBX.signUp(userEmail(u),pin);
+      await S.db.doc("users/"+acct.uid).set({name,username:normUser(u),role:"pending",at:Date.now(),note});
+      S.showSignup=false;
+      notifyManagers({name,username:normUser(u),note});
+    }catch(e){
+      if(acct){try{await acct.remove();}catch(_){}}
+      S.settingUp=false;render();
+      const f=document.querySelector('form[data-form="signup"]');if(f)ferr(f,acct?t("errGen"):authMsg(e));return;
     }
     S.settingUp=false;render();
   },
@@ -1691,7 +1764,9 @@ function startData(r){
     db.collection("log").orderBy("at","desc").limit(80).onSnapshot(s=>{S.log=s.docs.map(d=>Object.assign({id:d.id},d.data()));render();},onErr));
 }
 async function init(){
-  applyLang();render();
+  applyLang();
+  if(location.hash==="#requests")S.tab="more";
+  render();
   if(!firebaseConfig||!firebaseConfig.apiKey||!firebaseConfig.projectId){S.status="noconfig";render();return;}
   try{FBX=await connect(firebaseConfig);}catch(e){S.status="noconfig";render();return;}
   S.db=FBX.db;S.status="ok";
@@ -1703,7 +1778,7 @@ async function init(){
     if(u){
       profUnsub=S.db.doc("users/"+u.uid).onSnapshot(d=>{
         S.profile=d.exists?d.data():null;S.profileLoaded=true;
-        const r=S.profile&&!S.profile.disabled?normRole(S.profile.role):null;
+        const r=S.profile&&!S.profile.disabled&&ROLES.includes(S.profile.role)?S.profile.role:null;
         if(r!==dataRole)startData(r);
         render();
       },()=>{S.profile=null;S.profileLoaded=true;startData(null);render();});

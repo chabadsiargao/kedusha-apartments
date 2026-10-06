@@ -760,7 +760,9 @@ function role(){return S.profile&&!S.profile.disabled?normRole(S.profile.role):"
 const initial=n=>([...String(n||"?").trim()][0]||"?").toUpperCase();
 const activeUsers=()=>Object.entries(S.users).filter(([,u])=>!u.disabled&&ROLES.includes(u.role)).map(([id,u])=>Object.assign({id},u));
 const pendingUsers=()=>Object.entries(S.users).filter(([,u])=>!u.disabled&&u.role==="pending").map(([id,u])=>Object.assign({id},u)).sort((a,b)=>(a.at||0)-(b.at||0));
-function notifyManagers(p){if(!notifyUrl)return;try{fetch(notifyUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(p)}).catch(()=>{});}catch(_){}}
+// Send pure ASCII (non-ASCII as \uXXXX escapes) so Hebrew survives any charset handling on the way.
+const asciiJson=o=>JSON.stringify(o).replace(/[\u007f-￿]/g,c=>"\\u"+c.charCodeAt(0).toString(16).padStart(4,"0"));
+function notifyManagers(p){if(!notifyUrl)return;try{fetch(notifyUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:asciiJson(p)}).catch(()=>{});}catch(_){}}
 const mgrCount=()=>activeUsers().filter(u=>u.role==="manager").length;
 // A username becomes a sign-in address inside the project's own domain. Nothing is ever emailed.
 function normUser(u){return String(u||"").trim().toLowerCase().replace(/\s+/g,"");}

@@ -15,7 +15,13 @@ function doPost(e) {
     if (n >= DAILY_LIMIT) return reply("limit");
     props.setProperty(key, String(n + 1));
 
-    const clean = (v, max) => String(v || "").replace(/[\r\n]+/g, " ").slice(0, max);
+    // The site sends ASCII-only JSON (\uXXXX escapes), so Hebrew arrives intact.
+    // If a sender ever used the wrong encoding, say so plainly instead of mailing garbage.
+    const BROKEN = "(הטקסט לא נקלט כראוי, הפרטים המלאים מופיעים באתר)";
+    const clean = (v, max) => {
+      const s = String(v || "").replace(/[\r\n]+/g, " ").slice(0, max);
+      return /�/.test(s) ? BROKEN : s;
+    };
     const name = clean(p.name, 60), username = clean(p.username, 30), note = clean(p.note, 200);
     if (!name || !username) return reply("bad");
 

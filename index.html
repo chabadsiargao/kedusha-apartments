@@ -565,7 +565,16 @@ he:{
   approve:"אשר",reject:"דחה",approvedMsg:n=>`${n} אושר/ה`,review:"לבקשות",
   reqNotice:n=>n===1?"יש בקשת הצטרפות אחת שממתינה לאישור.":`יש ${n} בקשות הצטרפות שממתינות לאישור.`,
   invite1:"אפשר להוסיף אדם בעצמך ב\"הוסף משתמש\", או לשלוח לו את כתובת האתר כדי שיירשם ב\"הרשמה\".",
-  invite2:"כשמישהו נרשם, מגיע אליך מייל והבקשה מופיעה כאן למעלה. בוחרים תפקיד ומאשרים."
+  invite2:"כשמישהו נרשם, מגיע אליך מייל והבקשה מופיעה כאן למעלה. בוחרים תפקיד ומאשרים.",
+  pushTitle:"התראות בטלפון",pushOnMsg:"ההתראות פעילות במכשיר הזה.",pushOffMsg:"ההתראות כבויות במכשיר הזה.",
+  pushBlocked:"ההתראות חסומות בדפדפן. כדי להפעיל, מאשרים התראות לאתר בהגדרות הדפדפן וחוזרים לכאן.",
+  pushUnsupported:"הדפדפן הזה לא תומך בהתראות. באנדרואיד נסו ב-Chrome.",
+  pushIos:"באייפון: קודם מוסיפים את האתר למסך הבית (שיתוף ← הוספה למסך הבית), פותחים אותו מהאייקון, ואז מפעילים כאן.",
+  pushEnable:"הפעל התראות",pushDisable:"כבה התראות",pushTest:"שלח התראת ניסיון",
+  pushEnabled:"ההתראות הופעלו במכשיר הזה",pushDisabled:"ההתראות כובו במכשיר הזה",pushFail:"לא הצלחתי להפעיל התראות. נסו שוב.",
+  pushTestSent:"נשלחה התראת ניסיון. היא אמורה להגיע תוך כמה שניות.",
+  pushWhat_manager:"מה מקבלים: בקשות הצטרפות, תקלות חדשות ותקלות שטופלו, דירות שנוקו ודירות שצריך לנקות.",
+  pushWhat_cleaning:"מה מקבלים: דירות שצריך לנקות.",pushWhat_maintenance:"מה מקבלים: תקלות חדשות."
 },
 en:{
   appTitle:"Kedusha Apartments",sub:"Shared board for the apartments",langBtn:"עברית",
@@ -693,7 +702,16 @@ en:{
   approve:"Approve",reject:"Reject",approvedMsg:n=>`${n} approved`,review:"Review",
   reqNotice:n=>n===1?"One access request is waiting for approval.":`${n} access requests are waiting for approval.`,
   invite1:"Add a person yourself with \"Add user\", or send them the site address so they register under \"Register\".",
-  invite2:"When someone registers you get an email and the request shows up at the top here. Pick a role and approve."
+  invite2:"When someone registers you get an email and the request shows up at the top here. Pick a role and approve.",
+  pushTitle:"Phone notifications",pushOnMsg:"Notifications are on for this device.",pushOffMsg:"Notifications are off for this device.",
+  pushBlocked:"Notifications are blocked in the browser. Allow notifications for this site in the browser settings, then come back.",
+  pushUnsupported:"This browser doesn't support notifications. On Android, try Chrome.",
+  pushIos:"On iPhone: first add the site to the Home Screen (Share → Add to Home Screen), open it from the icon, then turn notifications on here.",
+  pushEnable:"Turn on notifications",pushDisable:"Turn off",pushTest:"Send a test notification",
+  pushEnabled:"Notifications are on for this device",pushDisabled:"Notifications are off for this device",pushFail:"Couldn't turn on notifications. Try again.",
+  pushTestSent:"Test notification sent. It should arrive within a few seconds.",
+  pushWhat_manager:"You'll get: access requests, new and fixed issues, apartments cleaned or needing cleaning.",
+  pushWhat_cleaning:"You'll get: apartments that need cleaning.",pushWhat_maintenance:"You'll get: new issues."
 }};
 function t(k,...a){const v=(T[S.lang][k]!==undefined?T[S.lang][k]:T.he[k]);if(v===undefined)return k;return typeof v==="function"?v(...a):v;}
 
@@ -715,6 +733,7 @@ const IC={
   cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 9.5v5M18 9.5v5"/>',
   list:'<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0"/>',
+  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15L6 16z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
   grid:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
   chart:'<path d="M3.5 20.5h17M6.5 17v-5M11 17V7M15.5 17v-8M20 17V4"/>',
   prev:'<path d="M9 6l6 6-6 6"/>',next:'<path d="M15 6l-6 6 6 6"/>',
@@ -762,6 +781,27 @@ const activeUsers=()=>Object.entries(S.users).filter(([,u])=>!u.disabled&&ROLES.
 const pendingUsers=()=>Object.entries(S.users).filter(([,u])=>!u.disabled&&u.role==="pending").map(([id,u])=>Object.assign({id},u)).sort((a,b)=>(a.at||0)-(b.at||0));
 // Send pure ASCII (non-ASCII as \uXXXX escapes) so Hebrew survives any charset handling on the way.
 const asciiJson=o=>JSON.stringify(o).replace(/[\u007f-￿]/g,c=>"\\u"+c.charCodeAt(0).toString(16).padStart(4,"0"));
+// Wakes the notification script; it reads the new events from the database itself.
+let pingTimer=null;
+function pingNotify(){if(!notifyUrl)return;clearTimeout(pingTimer);pingTimer=setTimeout(()=>{try{fetch(notifyUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:"{}"}).catch(()=>{});}catch(_){}},800);}
+/* ---------- push notifications ---------- */
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const isStandalone=()=>(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+function pushState(){
+  if(!("Notification" in window)||!("serviceWorker" in navigator))return isIOS()&&!isStandalone()?"ios":"unsupported";
+  if(Notification.permission==="denied")return "blocked";
+  return LS.get("pushToken")&&Notification.permission==="granted"?"on":"off";
+}
+const tokenDoc=()=>({uid:S.uid,lang:S.lang,at:Date.now(),ua:navigator.userAgent.slice(0,120)});
+// Points this device's token at whoever is signed in now (shared phones follow the user).
+function reattachPush(){const tok=LS.get("pushToken");if(tok&&S.uid&&S.db&&("Notification" in window)&&Notification.permission==="granted")S.db.doc("pushTokens/"+tok).set(tokenDoc()).catch(()=>{});}
+function pushBlock(){
+  const st=pushState();
+  const msg={on:t("pushOnMsg"),off:t("pushOffMsg"),blocked:t("pushBlocked"),unsupported:t("pushUnsupported"),ios:t("pushIos")}[st];
+  const btns=st==="on"?`<button type="button" class="btn small" data-act="pushTest">${t("pushTest")}</button><button type="button" class="btn ghost small" data-act="pushOff">${t("pushDisable")}</button>`
+    :st==="off"?`<button type="button" class="btn small" data-act="pushOn">${svg("bell")}${t("pushEnable")}</button>`:"";
+  return `<div class="block panel"><h3>${svg("bell")}${t("pushTitle")}</h3><p class="help" style="margin:0 0 8px">${msg} ${t("pushWhat_"+role())}</p>${btns?`<div class="form-actions">${btns}</div>`:""}</div>`;
+}
 function notifyManagers(p){if(!notifyUrl)return;try{fetch(notifyUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:asciiJson(p)}).catch(()=>{});}catch(_){}}
 const mgrCount=()=>activeUsers().filter(u=>u.role==="manager").length;
 // A username becomes a sign-in address inside the project's own domain. Nothing is ever emailed.
@@ -1161,6 +1201,7 @@ function sheetMe(){
     <div class="err" id="form-err"></div>
     <div class="form-actions"><button class="btn" type="submit">${svg("check")}${t("save")}</button></div>
   </form></div>
+  ${pushBlock()}
   <button type="button" class="btn ghost" data-act="logout">${svg("lock")}${t("signOut")}</button>`;
 }
 function checkCode(fd,form){const a=String(fd.get("pin")||"").trim(),b=String(fd.get("pin2")||"").trim();
@@ -1487,7 +1528,7 @@ async function safe(fn){
     else toast(t("errGen"));
     return false;}
 }
-function log(type,u,p){if(!S.db)return;S.db.collection("log").add({at:Date.now(),by:actorId(),t:type,u:u||null,p:p||{}}).catch(()=>{});}
+function log(type,u,p){if(!S.db)return;S.db.collection("log").add({at:Date.now(),by:actorId(),t:type,u:u||null,p:p||{}}).then(()=>pingNotify()).catch(()=>{});}
 async function upsertUnit(u,patch){
   const ref=S.db.doc("units/"+u);
   if(S.units[u]||(await ref.get()).exists)await ref.update(patch);else await ref.set(Object.assign({},patch));
@@ -1501,7 +1542,7 @@ async function syncSchedule(u,changedId,changedData){
 
 const ACT={
   tab(ds){S.tab=ds.v;LS.set("tab",ds.v);render();window.scrollTo(0,0);},
-  lang(){S.lang=S.lang==="he"?"en":"he";LS.set("lang",S.lang);applyLang();render();if(S.sheet)drawSheet();},
+  lang(){S.lang=S.lang==="he"?"en":"he";LS.set("lang",S.lang);applyLang();render();if(S.sheet)drawSheet();reattachPush();},
   openUnit(ds){openSheet({type:"unit",u:ds.u,live:true});},
   closeSheet(){closeSheet();},
   async clean(ds){if(!perm("clean"))return;const u=ds.u,v=ds.v;if(uDoc(u).clean===v)return;
@@ -1529,7 +1570,29 @@ const ACT={
   async reject(ds,el){if(!isMgr())return;const p=S.users[ds.id];if(!p||p.role!=="pending")return;if(!arm(el))return;
     if(await safe(()=>S.db.doc("users/"+ds.id).update({disabled:true,rejected:true,disabledAt:Date.now()})))log("user");},
   hideSetup(){S.showSetup=false;render();},
-  logout(){closeSheet();if(FBX)FBX.signOut();window.scrollTo(0,0);},
+  async logout(){closeSheet();const tok=LS.get("pushToken");if(tok&&S.db&&S.uid){try{await S.db.doc("pushTokens/"+tok).delete();}catch(_){}}if(FBX)FBX.signOut();window.scrollTo(0,0);},
+  async pushOn(){
+    const st=pushState();
+    if(st==="ios"){toast(t("pushIos"));return;}
+    if(st==="unsupported"||!(await FBX.push.supported())){toast(t("pushUnsupported"));return;}
+    try{
+      const perm=await Notification.requestPermission();
+      if(perm!=="granted"){toast(t("pushBlocked"));if(S.sheet)drawSheet();return;}
+      const reg=await navigator.serviceWorker.register("firebase-messaging-sw.js",{scope:"./"});
+      await navigator.serviceWorker.ready;
+      const tok=await FBX.push.enable(reg);
+      if(!tok)throw new Error("no token");
+      await S.db.doc("pushTokens/"+tok).set(tokenDoc());
+      LS.set("pushToken",tok);toast(t("pushEnabled"));
+    }catch(e){console.error(e);toast(t("pushFail"));}
+    if(S.sheet)drawSheet();
+  },
+  async pushOff(){
+    const tok=LS.get("pushToken");
+    try{if(tok)await S.db.doc("pushTokens/"+tok).delete();}catch(_){}
+    await FBX.push.disable();LS.set("pushToken","");toast(t("pushDisabled"));if(S.sheet)drawSheet();
+  },
+  pushTest(){log("push_test");toast(t("pushTestSent"));},
   myAccount(){openSheet({type:"me"});},
   newPerson(){if(isMgr())openSheet({type:"person"});},
   newLogin(ds){if(isMgr()&&ds.id!==S.uid)openSheet({type:"newlogin",id:ds.id});},
@@ -1576,7 +1639,7 @@ const FORMS={
     const cat=fd.get("cat"),desc=String(fd.get("desc")||"").trim();
     if(!cat)return ferr(form,t("e_cat"));if(!desc)return ferr(form,t("e_desc"));
     const doc={u:fd.get("u"),cat,prio:fd.get("prio")||"normal",desc,who:String(fd.get("who")||"").trim(),status:"open",at:Date.now(),by:actorId(),doneAt:null,doneBy:null};
-    if(await safe(()=>S.db.collection("issues").add(doc))){log("issue_new",doc.u,{c:cat});const back=S.sheet&&S.sheet.from;closeSheet();if(back)openSheet(back);toast(t("saved"));}
+    if(await safe(()=>S.db.collection("issues").add(doc))){log("issue_new",doc.u,{c:cat,prio:doc.prio});const back=S.sheet&&S.sheet.from;closeSheet();if(back)openSheet(back);toast(t("saved"));}
   },
   async stay(fd,form){
     const id=form.dataset.id||null;const old=id?S.stays.find(s=>s.id===id):null;
@@ -1771,6 +1834,8 @@ async function init(){
   if(!firebaseConfig||!firebaseConfig.apiKey||!firebaseConfig.projectId){S.status="noconfig";render();return;}
   try{FBX=await connect(firebaseConfig);}catch(e){S.status="noconfig";render();return;}
   S.db=FBX.db;S.status="ok";
+  // While the site is open, show incoming notifications as a toast.
+  FBX.push.onForeground(p=>{const n=p&&p.notification;if(n)toast((n.title||"")+(n.body?" · "+n.body:""));});
   S.db.doc("meta/setup").onSnapshot(d=>{S.setupOpen=!d.exists;if(!S.setupOpen)S.showSetup=false;render();},()=>{S.setupOpen=false;render();});
   FBX.onAuth(u=>{
     if(profUnsub){profUnsub();profUnsub=null;}
@@ -1780,7 +1845,7 @@ async function init(){
       profUnsub=S.db.doc("users/"+u.uid).onSnapshot(d=>{
         S.profile=d.exists?d.data():null;S.profileLoaded=true;
         const r=S.profile&&!S.profile.disabled&&ROLES.includes(S.profile.role)?S.profile.role:null;
-        if(r!==dataRole)startData(r);
+        if(r!==dataRole){startData(r);if(r)reattachPush();}
         render();
       },()=>{S.profile=null;S.profileLoaded=true;startData(null);render();});
     }else closeSheet();

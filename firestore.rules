@@ -67,6 +67,15 @@ service cloud.firestore {
       allow write: if isMgr();
     }
 
+    // Push notification tokens: each device registers itself for the signed-in user.
+    // Nobody reads them from the site; the notification script reads them with the owner's access.
+    match /pushTokens/{token} {
+      allow create, update: if active() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'lang', 'at', 'ua']);
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow read: if false;
+    }
+
     // Bookings, payments, income and expenses: managers only.
     match /fin/{rest=**} {
       allow read, write: if isMgr();

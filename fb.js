@@ -11,6 +11,7 @@ import {
   collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc,
   onSnapshot, query, orderBy, limit, where, writeBatch
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { getMessaging, getToken, deleteToken, isSupported, onMessage } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging.js";
 
 // Firestore error codes -> the codes the app already handles.
 function mapErr(e) {
@@ -103,6 +104,14 @@ export async function connect(config) {
       try { await reauthenticateWithCredential(u, EmailAuthProvider.credential(u.email, oldPass)); await updatePassword(u, newPass); }
       catch (e) { throw authErr(e); }
     },
-    signOut: () => signOut(auth)
+    signOut: () => signOut(auth),
+    // Push notifications for this device.
+    push: {
+      supported: () => isSupported().catch(() => false),
+      // Returns the device token. Uses the SDK's default web push key.
+      enable: async swReg => getToken(getMessaging(app), { serviceWorkerRegistration: swReg }),
+      disable: async () => { try { await deleteToken(getMessaging(app)); } catch (e) {} },
+      onForeground: cb => { isSupported().then(ok => { if (ok) onMessage(getMessaging(app), p => cb(p)); }).catch(() => {}); }
+    }
   };
 }

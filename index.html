@@ -836,7 +836,6 @@ function draw(){
   else if(S.status==="revoked")notice=`<div class="notice">${t("revoked")}</div>`;
   else if(!S.canWrite)notice=`<div class="notice">${t("readonly")}</div>`;
   else if(isMgr()&&pendingUsers().length)notice=`<div class="notice" style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>${t("reqNotice",pendingUsers().length)}</span><button type="button" class="btn small" data-act="goRequests">${t("review")}</button></div>`;
-  else if(isMgr()&&activeUsers().length<2)notice=`<div class="notice" style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>${t("addMoreUsers")}</span><button type="button" class="btn small" data-act="newPerson">${svg("plus")}${t("addUser")}</button></div>`;
   const view={board:viewBoard,clean:viewClean,issues:viewIssues,money:viewMoney,cash:viewCash,more:viewMore}[tabNow]||viewBoard;
   app.innerHTML=`
   <header class="top"><div class="wrap" style="padding-block:0">
